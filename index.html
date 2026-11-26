@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>몽표 夢標</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* 피그마 프레임(1330×900)을 그대로 옮긴 무대(.stage). 좌표·크기·글자는 피그마 레이어 값.
+   글꼴: 피그마 Source Han Serif K = Noto Serif KR (Heavy 900 / Bold 700 / SemiBold 600) */
+:root{--k:1;--mauve:#987D8D;--gray:#777;--paper:#FFFCFD}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:#fff;overflow:hidden}
+body{font-family:"Noto Serif KR","Source Han Serif K",serif;color:var(--gray);-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;touch-action:none}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--mauve);outline-offset:3px}
+p{margin:0}
+.scene{position:fixed;inset:0;display:none;overflow:hidden}
+.scene.on{display:block}
+.stage{position:absolute;left:50%;top:50%;width:1330px;height:900px;margin:-450px 0 0 -665px;transform:scale(var(--k));pointer-events:none}
+.stage>*{pointer-events:auto}
+.a{position:absolute;display:block}
+.t{position:absolute;white-space:nowrap;line-height:normal}
+.tc{position:absolute;white-space:nowrap;line-height:normal;transform:translateX(-50%);text-align:center}
+.nopt{pointer-events:none}
+#veil{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:50;background:#fff;transition:opacity .9s ease}
+#veil.black{background:#000}
+#veil.show{opacity:1;pointer-events:auto}
+#enterMsg{position:fixed;left:0;right:0;top:50%;transform:translateY(-50%);margin:0;text-align:center;z-index:51;color:var(--mauve);font-size:calc(20px*var(--k));font-weight:700;opacity:0;pointer-events:none;transition:opacity .6s}
+#enterMsg.on{opacity:1;transition-delay:.3s}
+/* 버튼_다음 컴포넌트 */
+.btn{position:absolute;height:51px;padding:0;background:var(--paper);border:1px solid #D9D9D9;box-shadow:0 4px 6px #D9D9D9;color:var(--mauve);font-size:16px;font-weight:700;transition:background .25s,color .25s,box-shadow .25s,translate .25s,border-color .25s}
+.btn:hover:not([disabled]){background:var(--mauve);color:#fff;border-color:var(--mauve);box-shadow:0 7px 14px rgba(152,125,141,.35);translate:0 -2px}
+.btn:active:not([disabled]){translate:0 1px;box-shadow:0 2px 4px rgba(152,125,141,.3)}
+.btn[disabled]{opacity:.55}
+#fold{transition:filter .25s,transform .25s;transform-origin:100% 100%}#fold:hover{filter:brightness(1.12);transform:scale(1.06)}
+#enter{transition:background .3s,color .3s}#enter:hover{background:rgba(224,183,213,.18);color:var(--mauve)}
+#env{transition:transform .35s}#env:hover{transform:translateY(-6px)}
+/* 07 정보 칸 · 장소 이름 · 질감 · 손 */
+#grunge{position:absolute;inset:-20px;pointer-events:none;mix-blend-mode:soft-light;opacity:.75;background-size:640px 440px;animation:film .9s steps(3) infinite}
+@keyframes film{0%{transform:translate(0,0)}33%{transform:translate(-7px,4px)}66%{transform:translate(5px,-6px)}100%{transform:translate(0,0)}}
+#info{left:34px;top:33px;width:262px;height:112px;background:rgba(255,252,253,.94);border:1px solid #D9D9D9;box-shadow:0 4px 6px rgba(0,0,0,.12)}
+#info>*{position:absolute;line-height:normal;white-space:nowrap}
+#infoName{left:18px;top:14px;font-size:15px;font-weight:700;color:var(--mauve)}
+#infoNo{right:18px;top:16px;font-size:11px;font-weight:900}
+#infoWhere{left:18px;top:42px;font-size:11px;font-weight:700}
+#infoNext{left:18px;top:60px;font-size:11px;font-weight:600;color:var(--mauve)}
+#infoMem{left:18px;top:86px;display:flex;gap:5px}
+#infoMem i{display:block;width:9px;height:9px;border-radius:50%;border:1px dashed #C9B6C1}
+#infoMem i.on{border:0;background:var(--mauve)}
+#soundBtn{right:12px;top:80px;height:22px;padding:0 8px;border:1px solid #D9D9D9;background:#fff;color:var(--mauve);font-size:10px;font-weight:700;border-radius:11px;transition:background .2s,color .2s}
+#soundBtn:hover{background:var(--mauve);color:#fff}
+#soundBtn.off{color:#A99AA2}
+#place{left:665px;top:96px;transform:translateX(-50%);font-size:22px;font-weight:700;color:#fff;letter-spacing:.06em;text-shadow:0 0 12px rgba(0,0,0,.35);opacity:0;pointer-events:none;white-space:nowrap}
+#place.show{animation:place 3.6s ease forwards}
+@keyframes place{0%{opacity:0;translate:0 8px}20%,70%{opacity:1;translate:0 0}100%{opacity:0;translate:0 -4px}}
+#hand{left:597px;top:440px;width:76px;height:92px;pointer-events:none;filter:drop-shadow(0 0 10px rgba(152,125,141,.55));animation:hover 2.4s ease-in-out infinite;transition:scale .3s}
+#hand.push{animation:none;scale:.88}
+@keyframes hover{0%,100%{translate:0 0}50%{translate:0 -6px}}
+
+.btn[disabled]{cursor:default}
+.guide{position:absolute;transform:translateX(-50%);white-space:nowrap;color:var(--mauve);font-size:13px;font-weight:600;animation:blink 1.8s ease-in-out infinite;transition:opacity .6s;pointer-events:none}
+.guide.off{opacity:0!important;animation:none}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* 01 꿈 입장 */
+#s01{background:#2A2A2A;cursor:pointer}
+#eye{left:250px;top:360px;width:829px;height:180px;background:url(assets/fig/photo01.jpg) -250px -360px/1330px 900px no-repeat;
+  -webkit-mask:url(assets/fig/lens.png) 0 0/100% 100% no-repeat;mask:url(assets/fig/lens.png) 0 0/100% 100% no-repeat;transform-origin:50% 50%;transition:transform .5s ease}
+#eye.blinking{animation:sleepy 9s ease-in-out infinite}
+/* 졸린 눈: 천천히 처졌다 뜨고, 깜빡, 무겁게 거의 감겼다 다시 뜸 */
+@keyframes sleepy{0%,8%{transform:scaleY(1)}20%{transform:scaleY(.42)}28%{transform:scaleY(.9)}34%,40%{transform:scaleY(1)}43%{transform:scaleY(.05)}46%,58%{transform:scaleY(.95)}72%{transform:scaleY(.12)}78%{transform:scaleY(.18)}88%,100%{transform:scaleY(1)}}
+#eye.close{animation:none;transform:scaleY(0);transition:transform .9s cubic-bezier(.6,0,.4,1)}
+#s01 h1{left:665px;top:139px;margin:0;color:#fff;font-size:40px;font-weight:700}
+#s01 .msg{left:665px;top:699px;color:#fff;font-size:14px;font-weight:600}
+#gauge{left:526.5px;top:759px;width:277.1px;height:6px;background:#555}
+#gauge i{display:block;height:100%;width:0;background:#fff}
+#camBtn{left:665px;top:790px;transform:translateX(-50%);background:none;border:0;color:rgba(255,255,255,.6);font-size:12px;font-weight:600;padding:8px 10px;white-space:nowrap;transition:color .25s}
+#camBtn:hover{color:#fff}
+#camView{left:1170px;top:745px;width:128px;height:96px;object-fit:cover;transform:scaleX(-1);border:1px solid rgba(255,255,255,.3);opacity:.55}
+
+/* 02 초대장 */
+#s02{background:#fff}
+.bub{position:absolute;will-change:transform}
+#env{left:499.4px;top:226.5px;width:337px;height:330px;cursor:pointer}
+#env>*{position:absolute}
+#envBody{left:0;top:99.7px}
+#envFlap{left:0;top:99.7px}
+#letter{left:24.55px;top:0;width:288px;height:151px;transition:transform 1s cubic-bezier(.3,.7,.2,1);transform-origin:50% 40%}
+#letter img{position:absolute;left:0;top:0}
+#letter .t1,#letter .t2{position:absolute;left:144px;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:900;color:var(--mauve);line-height:normal}
+#letter .t1{top:37.5px}#letter .t2{top:59px}
+#letter .t3{position:absolute;left:144px;top:98.7px;transform:translateX(-50%);text-align:center;font-size:9px;font-weight:400;color:#8C8A85;line-height:normal;white-space:nowrap}
+#seal{left:128.6px;top:190.5px}
+#hint2{left:665px;top:590px}
+#expand{position:absolute;inset:0;background:var(--paper);opacity:0;pointer-events:none;transition:opacity .8s}
+
+/* 03·04 안내서 / 입장권 */
+#s03{background:#fff}
+#s03 .stage{perspective:2400px}
+#paper{left:320px;top:60px;width:691px;height:781px;transform-style:preserve-3d;transition:transform 1.3s cubic-bezier(.5,0,.3,1)}
+#paper.flip{transform:rotateY(180deg)}
+#paper.fold{transition:transform 1s cubic-bezier(.6,0,.3,1),opacity 1s .4s;transform:rotateY(180deg) rotateX(-75deg) scale(.5);opacity:0}
+#paper.fold #front{visibility:hidden}
+.face{position:absolute;inset:0;background:url(assets/fig/paper.png) 0 0/691px 781px no-repeat;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+#back{transform:rotateY(180deg)}
+/* 안내서 (종이 기준 좌표 = 프레임 좌표 − 320, 60) */
+#front h2{left:345px;top:103px;margin:0;font-size:32px;font-weight:700;color:var(--mauve)}
+#front .sub{left:345px;top:161px;font-size:12px;font-weight:900}
+#front .intro{position:absolute;left:345px;top:233px;width:548px;transform:translateX(-50%);text-align:center;font-size:12px;font-weight:600;line-height:normal;white-space:normal}
+#front .it{position:absolute;left:345px;width:548px;transform:translateX(-50%);text-align:center;font-size:12px;font-weight:600;color:var(--mauve);line-height:normal}
+#fold{left:599px;top:689px;width:92px;height:92px;border:0;padding:0;background:url(assets/fig/fold.png) 0 0/92px 92px no-repeat}
+#foldTxt{left:579.5px;top:750px;font-size:12px;font-weight:600;animation:blink 1.8s ease-in-out infinite;pointer-events:none}
+/* 입장권 */
+#back h3{left:60px;top:56px;margin:0;font-size:32px;font-weight:700;color:var(--mauve)}
+#no4{right:49px;top:68px;font-size:12px;font-weight:900;text-align:right}
+#back .lab{font-size:12px;font-weight:900}
+#back .fieldbg{position:absolute}
+.field{position:absolute;border:0;background:transparent;padding:0;font:inherit;font-size:16px;font-weight:900;color:var(--mauve);line-height:normal;outline:0}
+input.field::placeholder{color:#C6B5BF;font-weight:600}
+#tname{left:62px;top:231px;width:565px;height:54px;padding-left:14px}
+#tdate{left:76px;top:379px}
+#ttime{left:369px;top:378px}
+#dest{left:59px;top:491px;font-size:20px;font-weight:700;color:var(--mauve)}
+#enter{left:243.5px;top:497.5px;width:204px;height:204px;border:0;border-radius:50%;background:url(assets/fig/enter_circle.png) 0 0/204px 204px no-repeat;color:var(--gray);font-size:20px;font-weight:700;padding:0}
+#stamp{left:209px;top:459px;width:240px;height:240px;transform:scale(1.6);opacity:0;pointer-events:none;transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+#stamp.on{opacity:1;transform:scale(1)}
+
+/* 05·06 기억 / 배경 */
+#s05{background:#fff}
+#space{position:absolute;inset:0;z-index:0}
+#space .it{position:absolute;left:0;top:0;cursor:pointer;will-change:transform}
+#space .it img{width:100%;height:100%;object-fit:contain;transition:transform .25s}
+#space .it:hover img{transform:scale(1.12)}
+#s05 .stage{z-index:2}
+.q{left:664.7px;font-size:24px;font-weight:900;color:var(--mauve);text-shadow:0 0 14px #fff,0 0 6px #fff}
+#s05h{top:396px}
+#s06h{top:222px}
+#tray{left:258px;top:777px;width:815px;height:97px;background:url(assets/fig/tray.png) 0 0/815px 97px no-repeat}
+#tray button{position:absolute;top:15px;width:58px;height:61px;border-radius:50%;border:0;background:transparent;padding:0}
+#tray button.full{border:1px solid var(--gray);background:#fff}
+#tray img{position:absolute;left:10%;top:10%;width:80%;height:80%;object-fit:contain}
+#next5{left:1139px;top:799px;width:106px}
+#hint5{left:665px;top:452px}
+.lc{position:absolute;border:0;background:none;padding:0;transition:left .6s cubic-bezier(.3,.8,.2,1),top .6s,width .6s}
+.lc .ph{position:absolute;left:0;top:0;width:100%;background:#D9D9D9;color:#222;font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.lc .ph img{width:100%;height:100%;object-fit:cover}
+.lc span{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--mauve);line-height:normal}
+.lc.c .ph{height:192px;border:2px solid var(--mauve)}
+.lc.c span{top:206px;font-size:20px;font-weight:900}
+.lc.s .ph{height:127.9px}
+.lc.s span{top:138px;font-size:16px;font-weight:700}
+#go6{left:592px;top:622px;width:143px}
+#hint6{left:665px;top:700px}
+
+/* 07 간판 거리 */
+#s07{background:#e8e7e4}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;transition:filter .8s}
+#gl.drag{cursor:grabbing}#gl.hot{cursor:pointer}
+#gl.blur{filter:blur(7px) brightness(1.05)}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(255,248,252,.55) 100%)}
+/* 몽환: 파스텔 빛 번짐 + 떠다니는 빛 방울 */
+#dreamy{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;opacity:.9;
+  background:radial-gradient(60% 50% at 20% 10%,rgba(250,194,226,.9),transparent 70%),radial-gradient(55% 50% at 85% 20%,rgba(195,205,240,.85),transparent 70%),radial-gradient(70% 45% at 50% 100%,rgba(251,221,183,.7),transparent 70%)}
+#haze{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,252,253,.38),rgba(255,252,253,0) 42%,rgba(255,252,253,0) 75%,rgba(250,240,246,.25));backdrop-filter:blur(.4px)}
+
+#wake{left:1166px;top:33px;width:132px}
+#dots{left:435.5px;top:849px;width:459px;height:18px}
+#dots::before{content:"";position:absolute;left:4.5px;right:4.5px;top:8.5px;height:1px;background:#fff}
+#dots i{position:absolute;top:4.5px;width:9px;height:9px;border-radius:50%;background:#fff}
+#dots i.on{background:#C9A9BB}
+#dots i.now{top:0;width:18px;height:18px;margin-left:-4.5px;background:#C9A9BB}
+#hint7{left:665px;top:810px;color:#fff;text-shadow:0 0 6px rgba(0,0,0,.5)}
+#near{position:absolute;inset:0;display:none}
+#near.on{display:block}
+#bigSign{left:321px;top:102px;width:628px;height:628px;cursor:pointer;touch-action:none;display:flex;align-items:center;justify-content:center}
+#bigSign img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+#emptySign .o{position:absolute;border-radius:50%;border:2px solid var(--gray);pointer-events:none}
+#nearMsg{left:634.5px;top:384px;font-size:16px;font-weight:900;color:var(--mauve);pointer-events:none}
+#press{left:568px;top:419px;width:134px;height:134px;pointer-events:none;opacity:0;transition:opacity .2s}
+#press.on{opacity:1}
+
+/* 08·09 */
+#s08{background:#fff}
+#p5frame{position:absolute;inset:0;width:100%;height:100%;border:0}
+#exit8{left:34px;top:33px;width:183px}
+#qbtn{left:1247px;top:820px;width:50px;height:50px;border-radius:50%;font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-weight:600;font-size:20px}
+#card{left:692px;top:111px;width:555px;height:678px;background:var(--paper);border:1px solid #D9D9D9;opacity:0;pointer-events:none;transition:opacity .4s}
+#card.on{opacity:1;pointer-events:auto}
+#card>*{position:absolute}
+#close9{left:504px;top:21px;width:33px;height:33px;border-radius:50%;height:33px;box-shadow:none;font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-weight:600}
+#cName{left:37px;top:50px;font-size:24px;font-weight:700;color:var(--mauve);line-height:normal;margin:0}
+#cScene{left:37px;top:102px;font-size:12px;font-weight:700;line-height:normal}
+#card hr{left:33px;top:146px;width:481px;margin:0;border:0;border-top:1px solid #C9C9C9}
+#card .lab{left:37px;font-size:11px;font-weight:700;line-height:normal}
+#cOpsL{top:185px}#cXYL{top:354px}
+#ic0{left:38px;top:220px;width:83px;height:83px;object-fit:contain}
+#ic1{left:147px;top:214px;width:69.7px;height:95.25px;object-fit:contain}
+#ic2{left:242px;top:221px;width:99.5px;height:82.2px;object-fit:contain}
+#cNum{left:37px;top:389px;font-size:12px;font-weight:700;line-height:normal}
+#cGrid{left:37px;top:432px;width:465px;height:205px}
+#cGrid i{position:absolute;width:5px;height:5px;border-radius:50%;background:#777}
+#cGrid i.ax{background:#B9A2AF}
+#cGrid i.me{width:18px;height:18px;margin:-6.5px 0 0 -6.5px}
+/* 10 빈 간판 · 그래픽 생성기 */
+#s10{background:#fff}
+#s10 h4{margin:0;font-size:20px;font-weight:700;color:var(--mauve)}
+#s10 .ax{font-size:16px;font-weight:700}
+#padGrid{left:104px;top:138px;width:546.66px;height:241px}
+#padGrid i{position:absolute;width:5.88px;height:5.88px;border-radius:50%;background:#777}
+#padGrid i.ax{background:#B9A2AF}
+#padHit{left:106.94px;top:140.94px;width:540.78px;height:235.12px;cursor:crosshair;touch-action:none}
+#padDot{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:1px solid var(--mauve);pointer-events:none}
+#padDot::after{content:"";position:absolute;left:11px;top:11px;width:22px;height:22px;border-radius:50%;background:var(--mauve)}
+#combo .sv{color:var(--mauve)}
+#combo .se{font-size:10px;font-weight:600;color:#A99AA2}
+.slider{position:absolute;width:252px;height:18px;cursor:pointer;touch-action:none;--k:50%}
+.slider::before{content:"";position:absolute;left:0;right:0;top:8px;height:2px;background:rgba(152,125,141,.25)}
+.slider i{position:absolute;left:0;top:8px;height:2px;width:var(--k);background:var(--mauve)}
+.slider b{position:absolute;left:var(--k);top:3px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--mauve)}
+.slider:focus-visible{outline:2px solid var(--mauve);outline-offset:6px}
+#combo{left:63px;top:498px;width:582px;height:220px;background:var(--paper);border:1px solid #D9D9D9;box-shadow:0 4px 6px #D9D9D9}
+#combo span{position:absolute;font-size:11px;font-weight:700;line-height:normal}
+#genBox{left:687px;top:126px;width:579px;height:592px;border:1.5px dotted #8F7A86;background:#fff}
+#gen{position:absolute;inset:0;width:100%;height:100%}
+#back10{left:64px;top:784px;width:183px}
+#hang10{left:871px;top:784px;width:183px}
+#save10{left:1083px;top:784px;width:183px}
+#msg10{left:1174.5px;top:846px;font-size:12px;font-weight:600;color:var(--mauve)}
+#hint10{left:377px;top:418px}
+/* 11 깨어나기 · 꿈 여정표 */
+#s11{background:#fff}
+#s11 h4{margin:0;font-size:20px;font-weight:700;color:var(--mauve)}
+#map11{left:61px;top:135px;width:710px;height:320px}
+#signs11{left:64px;top:557px;width:700px;height:170px;display:flex;gap:24px;align-items:center;overflow:hidden}
+#signs11 img{flex:none;object-fit:contain;margin:0 -12px}
+.empty11{font-size:13px;font-weight:600;color:#A99AA2}
+#rec11{left:835px;top:75px;width:431px;height:759px}
+#stamp11{left:861px;top:100px;width:80px;height:80px;opacity:0;transform:scale(1.7) rotate(-14deg);pointer-events:none}
+#stamp11.on{opacity:1;transform:none;transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+#save11{left:63px;top:783px;width:183px}
+#again{left:278px;top:783px;width:183px}
+#msg11{left:154.5px;top:845px;font-size:12px;font-weight:600;color:var(--mauve)}
+@media (prefers-reduced-motion:reduce){.guide,#foldTxt{animation:none;opacity:1}#eye.blinking{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- 01 꿈 입장 -->
+<section class="scene on" id="s01" aria-label="꿈 입장" tabindex="0">
+  <div class="stage">
+    <div id="eye" class="a blinking"></div>
+    <h1 class="tc">몽표 夢標</h1>
+    <p class="tc msg" id="msg01">화면을 길게 눌러 눈을 감아 보세요</p>
+    <div id="gauge" class="a"><i></i></div>
+    <button id="camBtn" class="a" type="button">카메라로 눈 감기</button>
+    <video id="camView" class="a" muted playsinline hidden></video>
+  </div>
+</section>
+
+<!-- 02 초대장 (피그마 '02 초대장 후') -->
+<section class="scene" id="s02" aria-label="초대장">
+  <div class="stage" id="st02">
+    <img class="a nopt" src="assets/fig/glow_peach.png" alt="" style="left:0;top:0;width:787px;height:823px">
+    <img class="a nopt" src="assets/fig/glow_pink.png" alt="" style="left:577px;top:166px;width:753px;height:734px">
+    <img class="a nopt" src="assets/fig/floor02.png" alt="" style="left:0;top:549px;width:1330px;height:351px">
+    <div id="env" class="a" role="button" tabindex="0" aria-label="초대장 펼치기">
+      <img id="envBody" src="assets/fig/env_body.png" alt="" width="337" height="230">
+      <img id="envFlap" src="assets/fig/env_flap.png" alt="" width="337" height="133">
+      <div id="letter"><img src="assets/fig/card02_bg.png" alt="" width="288" height="151">
+        <span class="t1">꿈의 세계로</span><span class="t2">당신을 초대합니다</span>
+        <span class="t3">입장 넘버<br>(<span id="no2">0000</span>)</span></div>
+      <img id="seal" src="assets/fig/seal.png" alt="" width="73" height="73">
+    </div>
+    <div id="bubs2"></div>
+    <div class="guide" id="hint2">초대장을 눌러 펼쳐 보세요 · 드래그하면 주위를 둘러봐요</div>
+  </div>
+  <div id="expand"></div>
+</section>
+
+<!-- 03·04 안내서 / 입장권 -->
+<section class="scene" id="s03" aria-label="안내서">
+  <div class="stage">
+    <img class="a nopt" src="assets/fig/glow03.png" alt="" style="left:95px;top:0;width:1140px;height:900px">
+    <div id="paper" class="a">
+      <article class="face" id="front">
+        <h2 class="tc">몽표 夢標</h2>
+        <p class="tc sub">꿈의 간판을 읽는 법</p>
+        <div class="intro">잠과 깸 사이, 아주 짧은 틈에 열리는 세계에 오신 것을 환영합니다.<br>이곳에서는 말 대신 꿈의 간판이 당신의 마음을 전합니다.<br><br>따뜻한 사랑과 어린 시절의 기억, 오늘의 불안과 같은 것들은<br>이곳에서 당신의 무의식이 되어 꿈을 이룹니다.<br><br>당신의 감정과 마음의 모양이 결정하는 간판들이 하나 둘 길을 밝혀 줄 것입니다.<br>간판을 따라 천천히 걸어보고, 꿈을 직접 만들어보세요.<br>그 길의 끝에서 오늘 밤 당신의 꿈을 읽을 수 있을 것입니다.</div>
+        <div class="it" style="top:451px">1<br>간판을 따라 걸으세요.</div>
+        <div class="it" style="top:523px">2<br>떠다니는 기억에 손을 뻗어 보세요.</div>
+        <div class="it" style="top:600px">3<br>빈 간판을 만나면, 당신의 마음을 걸어 두세요.</div>
+        <button id="fold" class="a" aria-label="안내서 넘기기"></button><span id="foldTxt" class="tc">넘기기</span>
+      </article>
+      <article class="face" id="back">
+        <h3 class="t">夢標 입장권</h3><span id="no4" class="t">입장 번호 0000</span>
+        <img class="a" src="assets/fig/divider.png" alt="" style="left:3px;top:150px;width:685px;height:1px">
+        <label class="t lab" for="tname" style="left:63px;top:195px">여행자 이름</label>
+        <img class="fieldbg" src="assets/fig/field_name.png" alt="" style="left:61.5px;top:230.5px;width:567px;height:55px">
+        <input id="tname" class="field" maxlength="12" placeholder="이름을 입력하세요." autocomplete="off">
+        <span class="t lab" style="left:61px;top:327px">날짜</span>
+        <img class="fieldbg" src="assets/fig/field_half.png" alt="" style="left:61.5px;top:362.5px;width:276px;height:55px">
+        <span class="t field" id="tdate"></span>
+        <span class="t lab" style="left:355px;top:327px">잠든 시각</span>
+        <img class="fieldbg" src="assets/fig/field_half.png" alt="" style="left:355.5px;top:362.5px;width:274px;height:55px">
+        <span class="t field" id="ttime"></span>
+        <span class="t lab" style="left:60px;top:459px">목적지</span>
+        <span class="t" id="dest">꿈의 세계</span>
+        <button id="enter" class="a" type="button">입장하기</button>
+        <img id="stamp" class="a" src="assets/fig/stamp.png" alt="">
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 05·06 기억 / 배경 -->
+<section class="scene" id="s05" aria-label="기억 고르기">
+  <div id="space"></div>
+  <div class="stage">
+    <p class="tc q" id="s05h">어떤 기억이 떠오르나요?</p>
+    <div class="guide" id="hint5">스크롤하면 안으로 걸어 들어가요 · 사진을 눌러 담아 보세요</div>
+    <div id="tray" class="a" aria-label="고른 기억"></div>
+    <button class="btn" id="next5" disabled>다음</button>
+    <div id="s06ui" hidden>
+      <p class="tc q" id="s06h">어디에서 꿈을 꿀까요?</p>
+      <div id="land"></div>
+      <button class="btn" id="go6">들어가기</button>
+      <div class="guide" id="hint6">양옆 사진을 누르면 가운데로 와요</div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 간판 거리 -->
+<section class="scene" id="s07" aria-label="간판 거리">
+  <canvas id="gl"></canvas><div id="grunge"></div><div id="dreamy"></div><div id="haze"></div><div id="vig"></div>
+  <div id="near"></div>
+  <div class="stage">
+    <div id="nearUI" hidden>
+      <div id="bigSign" class="a"><img alt="">
+        <div id="emptySign" hidden><span class="o" style="left:0;top:0;width:628px;height:628px;background:var(--paper)"></span><span class="o" style="left:32px;top:32px;width:564px;height:564px"></span></div>
+      </div>
+      <p id="nearMsg" class="tc">손을 대면 이 간판이 당신의 마음을 읽습니다</p>
+      <svg id="hand" class="a" viewBox="0 0 76 92" aria-hidden="true"><g fill="#FFFCFD" fill-opacity=".62">
+        <rect x="16" y="8" width="11" height="44" rx="5.5"/><rect x="28.5" y="2" width="11" height="48" rx="5.5"/><rect x="41" y="5" width="11" height="46" rx="5.5"/><rect x="53.5" y="14" width="10" height="38" rx="5"/>
+        <rect x="2" y="40" width="11" height="32" rx="5.5" transform="rotate(-32 7.5 56)"/><path d="M14 40 H64 V62 C64 80 54 90 39 90 C24 90 14 80 14 64 Z"/></g></svg>
+      <svg id="press" class="a" viewBox="0 0 134 134"><circle id="pressFill" cx="67" cy="67" r="61" fill="none" stroke="#987D8D" stroke-width="5" stroke-dasharray="383.3" stroke-dashoffset="383.3" transform="rotate(-90 67 67)"/><circle cx="67" cy="67" r="7" fill="#987D8D"/></svg>
+    </div>
+    <div class="guide" id="hint7">스크롤하면 앞으로 걷고, 드래그하면 둘러봐요 · 간판을 누르면 다가가요</div>
+    <div id="dots" class="a"></div>
+    <button class="btn" id="wake">깨어나기</button>
+    <div id="info" class="a" aria-label="여행자 정보"><span id="infoName"></span><span id="infoNo"></span><span id="infoWhere"></span><span id="infoNext"></span><span id="infoMem"></span><button id="soundBtn" type="button">소리 켬</button></div>
+    <p id="place" class="a"></p>
+  </div>
+</section>
+
+<!-- 08·09 간판 안 -->
+<section class="scene" id="s08" aria-label="간판 안의 꿈">
+  <iframe id="p5frame" title="감정 인터랙션" hidden></iframe>
+  <div class="stage">
+    <button class="btn" id="exit8">이 꿈에서 나가기</button>
+    <button class="btn" id="qbtn" aria-label="감정 설명 보기">?</button>
+    <aside id="card" class="a" aria-label="감정 설명 카드">
+      <button class="btn" id="close9" aria-label="닫기">X</button>
+      <h3 id="cName"></h3>
+      <p id="cScene"></p>
+      <hr>
+      <p class="lab" id="cOpsL">형태소 / 리듬 연산 / 응용 연산</p>
+      <img id="ic0" alt=""><img id="ic1" alt=""><img id="ic2" alt="">
+      <p class="lab" id="cXYL">좌표</p>
+      <p id="cNum"></p>
+      <div id="cGrid"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- 10 빈 간판 · 그래픽 생성기 -->
+<section class="scene" id="s10" aria-label="그래픽 생성기">
+  <div class="stage">
+    <img class="a nopt" src="assets/fig/glow03.png" alt="" style="left:95px;top:0;width:1140px;height:900px">
+    <h4 class="t" style="left:64px;top:75px">정서와 각성</h4>
+    <span class="t ax" style="right:1236px;top:136px">흥분</span>
+    <span class="t ax" style="right:1236px;top:358px">차분</span>
+    <span class="t ax" style="left:100px;top:388px">불쾌</span>
+    <span class="t ax" style="right:679px;top:388px">유쾌</span>
+    <div id="padGrid" class="a nopt"></div>
+    <div id="padHit" class="a" role="presentation"><span id="padDot"></span></div>
+    <div class="guide" id="hint10">점을 끌거나 아래 슬라이더를 움직여 보세요</div>
+    <h4 class="t" style="left:64px;top:450px">지금 조합</h4>
+    <div id="combo" class="a">
+      <span style="left:29px;top:31px">형태소</span><span id="iM" style="left:110px;top:31px"></span>
+      <span style="left:29px;top:79px">리듬 연산</span><span id="iR" style="left:110px;top:79px"></span>
+      <span style="left:29px;top:127px">응용 연산</span><span id="iT" style="left:110px;top:127px"></span>
+      <span style="left:29px;top:175px">가까운 감정</span><span id="iN" style="left:110px;top:175px"></span>
+    
+      <span style="left:300px;top:31px">정서</span><span class="sv" id="valV" style="right:30px;top:31px"></span>
+      <div class="slider" id="slV" style="left:300px;top:52px" role="slider" tabindex="0" aria-label="정서" aria-valuemin="-1" aria-valuemax="1"><i></i><b></b></div>
+      <span class="se" style="left:300px;top:72px">불쾌</span><span class="se" style="right:30px;top:72px">유쾌</span>
+      <span style="left:300px;top:127px">각성</span><span class="sv" id="valA" style="right:30px;top:127px"></span>
+      <div class="slider" id="slA" style="left:300px;top:148px" role="slider" tabindex="0" aria-label="각성" aria-valuemin="0" aria-valuemax="1"><i></i><b></b></div>
+      <span class="se" style="left:300px;top:168px">차분</span><span class="se" style="right:30px;top:168px">흥분</span>
+    </div>
+    <div id="genBox" class="a"><canvas id="gen"></canvas></div>
+    <button class="btn" id="back10">거리로 돌아가기</button>
+    <button class="btn" id="hang10">간판에 걸기</button>
+    <button class="btn" id="save10">이미지 저장</button>
+    <span class="tc" id="msg10"></span>
+  </div>
+</section>
+
+<!-- 11 깨어나기 · 꿈 여정표 -->
+<section class="scene" id="s11" aria-label="꿈 여정표">
+  <div class="stage">
+    <img class="a nopt" src="assets/fig/glow03.png" alt="" style="left:95px;top:0;width:1140px;height:900px">
+    <h4 class="t" style="left:64px;top:75px">지금까지 꾼 꿈</h4>
+    <canvas id="map11" class="a nopt"></canvas>
+    <h4 class="t" style="left:64px;top:496px">들어간 꿈 간판</h4>
+    <div id="signs11" class="a"></div>
+    <canvas id="rec11" class="a" aria-label="꿈 여정표"></canvas>
+    <img id="stamp11" class="a" src="assets/fig/stamp11.png" alt="">
+    <button class="btn" id="save11">여정표 저장</button>
+    <button class="btn" id="again">다시 잠들기</button>
+    <span class="tc" id="msg11"></span>
+  </div>
+</section>
+
+<div id="veil"></div>
+<p id="enterMsg">꿈 속으로 들어갑니다.</p>
+
+<script src="js/data.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/signs.js"></script>
+<script src="js/street.js"></script>
+<script src="js/gen.js"></script>
+<script src="js/app.js"></script>
+<script src="js/eyecam.js"></script>
+</body>
+</html>
