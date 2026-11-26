@@ -371,13 +371,12 @@ function fillCard(e){
   document.addEventListener('pointerover', e => { const b = e.target.closest('.btn'); if (b && !b.contains(e.relatedTarget)) Snd.hover(); });
   const sb = document.querySelector('#soundBtn'), paint = () => { sb.textContent = Snd.on ? '소리 켬' : '소리 끔'; sb.classList.toggle('off', !Snd.on); };
   sb.addEventListener('click', e => { e.stopPropagation(); Snd.toggle(); paint(); }); paint();
-  // 그런지 질감: 먼지 · 긁힘 · 얼룩 (한 번 만들어 두고 필름처럼 살짝 흔들림)
-  const c = document.createElement('canvas'); c.width = 640; c.height = 440; const x = c.getContext('2d');
-  const d = x.createImageData(640, 440); for (let i = 0; i < d.data.length; i += 4){ const v = 128 + (Math.random()-.5)*70; d.data[i] = d.data[i+1] = d.data[i+2] = v; d.data[i+3] = 255; } x.putImageData(d, 0, 0);
-  for (let i = 0; i < 160; i++){ x.fillStyle = Math.random() < .5 ? 'rgba(20,20,20,.5)' : 'rgba(250,250,250,.5)'; x.beginPath(); x.arc(Math.random()*640, Math.random()*440, Math.random()*1.6+.3, 0, 7); x.fill(); }
-  x.strokeStyle = 'rgba(30,30,30,.35)'; for (let i = 0; i < 7; i++){ const sx = Math.random()*640; x.lineWidth = Math.random()*.8+.3; x.beginPath(); x.moveTo(sx, 0); x.lineTo(sx + (Math.random()-.5)*30, 440); x.stroke(); }
-  for (let i = 0; i < 18; i++){ const g = x.createRadialGradient(0,0,0,0,0,1); const px = Math.random()*640, py = Math.random()*440, r = 30 + Math.random()*90;
-    x.save(); x.translate(px, py); x.scale(r, r*(.5+Math.random()*.6)); g.addColorStop(0, `rgba(${Math.random()<.5?60:200},${Math.random()<.5?60:200},${Math.random()<.5?60:200},.07)`); g.addColorStop(1, 'rgba(128,128,128,0)'); x.fillStyle = g; x.beginPath(); x.arc(0,0,1,0,7); x.fill(); x.restore(); }
+  // 필름 그레인: 고운 입자 몇 장을 번갈아 보여 줌 (긁힘·얼룩 없이 부드럽게)
+  const frames = [0,1,2].map(() => { const c = document.createElement('canvas'); c.width = 300; c.height = 300; const x = c.getContext('2d');
+    const d = x.createImageData(300, 300); for (let i = 0; i < d.data.length; i += 4){ const v = 128 + (Math.random()+Math.random()-1)*60; d.data[i] = d.data[i+1] = d.data[i+2] = v; d.data[i+3] = 255; }
+    x.putImageData(d, 0, 0); return c.toDataURL(); });
+  const c = { toDataURL: () => frames[0] };
+  let gi = 0; setInterval(() => { const g = document.querySelector('#grunge'); if (g && g.offsetParent) g.style.backgroundImage = `url(${frames[gi = (gi+1) % 3]})`; }, 90);
   document.querySelector('#grunge').style.backgroundImage = `url(${c.toDataURL()})`;
 
 }

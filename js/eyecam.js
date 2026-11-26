@@ -13,14 +13,15 @@
     btn.textContent = '카메라를 켜는 중…';
     let stream;
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' }, audio: false }); }
-    catch (err){ btn.textContent = '이 화면에서는 카메라를 쓸 수 없어요'; running = false; return; }
+    catch (err){ btn.textContent = err && err.name === 'NotAllowedError' ? '카메라 권한을 허용해 주세요 (주소창 왼쪽 자물쇠)' : '이 화면에서는 카메라를 쓸 수 없어요'; running = false; return; }
     video.srcObject = stream; video.hidden = false; await video.play().catch(() => {});
     let lm;
     try {
       const { FaceLandmarker, FilesetResolver } = await import(`${CDN}/vision_bundle.mjs`);
       const fs = await FilesetResolver.forVisionTasks(`${CDN}/wasm`);
-      lm = await FaceLandmarker.createFromOptions(fs, { baseOptions: { modelAssetPath: MODEL, delegate: 'GPU' }, outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1 });
-    } catch (err){ btn.textContent = '눈 인식을 불러오지 못했어요 · 화면을 눌러 주세요'; stream.getTracks().forEach(t => t.stop()); video.hidden = true; running = false; return; }
+      const opt = d => ({ baseOptions: { modelAssetPath: MODEL, delegate: d }, outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1 });
+      try { lm = await FaceLandmarker.createFromOptions(fs, opt('GPU')); } catch (e1){ lm = await FaceLandmarker.createFromOptions(fs, opt('CPU')); }
+    } catch (err){ console.warn('eyecam', err); btn.textContent = '눈 인식을 불러오지 못했어요 · 화면을 길게 눌러 주세요'; stream.getTracks().forEach(t => t.stop()); video.hidden = true; running = false; return; }
     btn.textContent = '눈을 2초 동안 감아 보세요';
     if (msg) msg.textContent = '화면을 길게 누르거나, 눈을 2초 동안 감아 보세요';
     let closedSince = 0, lastT = -1;
