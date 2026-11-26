@@ -80,7 +80,7 @@ p{margin:0}
 #gauge i{display:block;height:100%;width:0;background:#fff}
 #camBtn{left:665px;top:790px;transform:translateX(-50%);background:none;border:1px solid rgba(255,255,255,.35);border-radius:16px;color:rgba(255,255,255,.75);font-size:12px;font-weight:600;padding:7px 14px;white-space:nowrap;transition:color .25s,background .25s}
 #camBtn:hover{color:#2A2A2A;background:#fff}
-#camView{left:1170px;top:745px;width:128px;height:96px;object-fit:cover;transform:scaleX(-1);border:1px solid rgba(255,255,255,.3);opacity:.55}
+#camView{left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none}
 
 /* 02 초대장 */
 #s02{background:#fff}
@@ -168,6 +168,7 @@ input.field::placeholder{color:#C6B5BF;font-weight:600}
 #haze{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,252,253,.38),rgba(255,252,253,0) 42%,rgba(255,252,253,0) 75%,rgba(250,240,246,.25));backdrop-filter:blur(.4px)}
 
 #wake{left:1166px;top:33px;width:132px}
+#back7{left:34px;top:163px;width:183px}
 #dots{left:435.5px;top:849px;width:459px;height:18px}
 #dots::before{content:"";position:absolute;left:4.5px;right:4.5px;top:8.5px;height:1px;background:#fff}
 #dots i{position:absolute;top:4.5px;width:9px;height:9px;border-radius:50%;background:#fff}
@@ -257,7 +258,7 @@ input.field::placeholder{color:#C6B5BF;font-weight:600}
     <p class="tc msg" id="msg01">화면을 길게 눌러 눈을 감아 보세요</p>
     <div id="gauge" class="a"><i></i></div>
     <button id="camBtn" class="a" type="button">카메라로 눈 감기</button>
-    <video id="camView" class="a" muted playsinline hidden></video>
+    <video id="camView" class="a" muted playsinline aria-hidden="true"></video>
   </div>
 </section>
 
@@ -351,6 +352,7 @@ input.field::placeholder{color:#C6B5BF;font-weight:600}
     <div class="guide" id="hint7">스크롤하면 앞으로 걷고, 드래그하면 둘러봐요 · 간판을 누르면 다가가요</div>
     <div id="dots" class="a"></div>
     <button class="btn" id="wake">깨어나기</button>
+    <button class="btn" id="back7">← 배경 다시 고르기</button>
     <div id="info" class="a" aria-label="여행자 정보"><span id="infoName"></span><span id="infoNo"></span><span id="infoWhere"></span><span id="infoNext"></span><span id="infoMem"></span><button id="soundBtn" type="button">소리 켬</button></div>
     <p id="place" class="a"></p>
   </div>

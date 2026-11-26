@@ -1,7 +1,7 @@
 // 몽표 — 화면 흐름 (01 꿈 입장 → 11 깨어나기)
 {
 const $ = s => document.querySelector(s);
-const S = { signs: {}, signImgs: {}, visits: [], hung: null, no: null, name: '', slept: new Date(), mems: [], land: 'city', emoImgs: {}, objImgs: {}, city: {}, ready: null };
+const S = { filled: {}, signs: {}, signImgs: {}, visits: [], hung: null, no: null, name: '', slept: new Date(), mems: [], land: 'city', emoImgs: {}, objImgs: {}, city: {}, ready: null };
 const veil = $('#veil');
 let dbP = null, dlP = null;
 try { if (window.claude && claude.use){ dbP = claude.use('db'); dlP = claude.use('downloads'); } } catch(e) {}
@@ -169,6 +169,14 @@ $('#next5').addEventListener('click', () => {
   for (const id of ['#s05h','#tray','#next5']) $(id).hidden = true;
   $('#s06ui').hidden = false; renderLands();
 });
+// 07 → 06 배경 다시 고르기
+$('#back7').addEventListener('click', async () => {
+  Street.stop(); Snd.street(false); leaveNear();
+  await fadeTo('s05', 'white', 600, 200);
+  SP.mode = 'land'; SP.run = true; loopSpace();
+  for (const id of ['#s05h','#tray','#next5']) $(id).hidden = true;
+  $('#s06ui').hidden = false; renderLands();
+});
 
 // 06: 풍경 카드 — 피그마 자리표시 그대로 (사진은 assets/land/<id>.jpg 를 넣으면 그 사진이 들어감)
 let landIdx = 1;
@@ -196,7 +204,7 @@ let curSign = null;
 async function enter07(){
   const lit = new Set(S.mems.map(o => o.emo));
   const memories = S.mems.map(o => ({ img: S.objImgs[o.id], emo: o.emo }));
-  await Street.build({ land: S.land, lit, memories, signs: S.signs, filled: {}, city: S.city });
+  await Street.build({ land: S.land, lit, memories, signs: S.signs, filled: S.filled, city: S.city });
   await fadeTo('s07', 'white', 800, 300); Street.start(); Snd.street(true); placeName('간판 거리');
   setTimeout(() => hideGuide('#hint7'), 9000);
 }
@@ -288,7 +296,7 @@ function fillCard(e){
   };
   const back = async () => { Gen.stop(); await window.__backToStreet(); };
   $('#back10').addEventListener('click', back);
-  $('#hang10').addEventListener('click', async () => { const img = Gen.snapshot(900); Street.setFilled(sign.slot, img);
+  $('#hang10').addEventListener('click', async () => { const img = Gen.snapshot(900); Street.setFilled(sign.slot, img); S.filled[sign.slot] = img;
     S.hung = img; S.mine = { v: Gen.state.v, a: Gen.state.a }; S.visits.push('mine'); await back(); });
   $('#save10').addEventListener('click', async () => {
     const msg = $('#msg10');

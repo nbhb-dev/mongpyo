@@ -14,7 +14,7 @@
     let stream;
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' }, audio: false }); }
     catch (err){ btn.textContent = err && err.name === 'NotAllowedError' ? '카메라 권한을 허용해 주세요 (주소창 왼쪽 자물쇠)' : '이 화면에서는 카메라를 쓸 수 없어요'; running = false; return; }
-    video.srcObject = stream; video.hidden = false; await video.play().catch(() => {});
+    video.srcObject = stream; await video.play().catch(() => {});
     let lm;
     try {
       const { FaceLandmarker, FilesetResolver } = await import(`${CDN}/vision_bundle.mjs`);
@@ -26,7 +26,7 @@
     if (msg) msg.textContent = '화면을 길게 누르거나, 눈을 2초 동안 감아 보세요';
     let closedSince = 0, lastT = -1;
     const loop = () => {
-      if (window.__eyeDone){ stream.getTracks().forEach(t => t.stop()); video.hidden = true; btn.hidden = true; return; }
+      if (window.__eyeDone){ stream.getTracks().forEach(t => t.stop()); btn.hidden = true; return; }
       if (video.readyState >= 2 && video.currentTime !== lastT){
         lastT = video.currentTime;
         const r = lm.detectForVideo(video, performance.now());
